@@ -1,0 +1,162 @@
+<html>
+
+<body>
+
+<audio id="audio-test" src="https://api.soundcloud.com/tracks/176852404/stream?client_id=7e93c6c53246047912be8885c59ee55a" controls></audio>
+
+<div id="visualizerwrapper">
+    <canvas id="visualizer" width="640" height="200"></canvas> 
+</div>
+
+
+<div id="milkshakewrapper">
+    <canvas id="milkshake" width="640" height="500"></canvas> 
+</div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="http://connect.soundcloud.com/sdk.js"></script>
+<script type="text/javascript" src="milkshake/milkshake.js"></script>
+
+<script>
+
+// SC.initialize({
+//   client_id: '7e93c6c53246047912be8885c59ee55a'//,
+// //  redirect_uri: 'http://localhost:9090/callback.html'
+// });
+
+
+
+
+
+// set up canvas context for visualizer
+
+var canvas = document.querySelector('#visualizer');
+var milkshakecanvas = document.querySelector('#milkshake');
+var canvasCtx = canvas.getContext("2d");
+
+var intendedWidth = document.querySelector('#visualizerwrapper').clientWidth;
+canvas.setAttribute('width',intendedWidth);
+
+// milkshake stuff
+//milkshakecanvas.setAttribute('width', intendedWidth);
+//milk.shake('milkshake');
+//setInterval(function() {
+                //shaker.selectNext(true);
+            //}, 10000);  
+
+WIDTH = canvas.width;
+HEIGHT = canvas.height;
+
+function drawBars(buffer, bufferLength) {
+      canvasCtx.fillStyle = 'rgb(0, 0, 0)';
+      canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+
+      var barWidth = (WIDTH / bufferLength) * 2.5;
+      var barHeight;
+      var x = 0;
+
+      for(var i = 0; i < bufferLength; i++) {
+        barHeight = buffer[i];
+
+        canvasCtx.fillStyle = 'rgb(' + (barHeight+100) + ',50,50)';
+        canvasCtx.fillRect(x,HEIGHT-barHeight/2,barWidth,barHeight/2);
+
+        x += barWidth + 1;
+      }
+}
+
+//------------------------------------------
+
+var song_url = "https://api.soundcloud.com/tracks/176852404/stream?client_id=7e93c6c53246047912be8885c59ee55a";
+
+var audio_el = document.querySelector('#audio-test');
+
+var context = new (window.AudioContext || window.webkitAudioContext)();
+var source = context.createMediaElementSource(audio_el);
+var processor = context.createScriptProcessor(512);
+var analyser = context.createAnalyser()
+
+analyser.fftSize = 256;
+var bufferLength = analyser.fftSize;
+var dataArray = new Uint8Array(bufferLength);
+
+processor.onaudioprocess = function(event) {
+    var inputL = event.inputBuffer.getChannelData(0);
+    var inputR = event.inputBuffer.getChannelData(1);
+    var outputL = event.outputBuffer.getChannelData(0);
+    var outputR = event.outputBuffer.getChannelData(1);  
+    var n = inputL.length;
+
+    //console.log("Processing.. " + n);
+
+    for (var i = 0; i < n; ++i) {
+        outputL[i] = inputL[i];
+        outputR[i] = inputR[i];
+    }
+
+    // fft
+    analyser.getByteFrequencyData(dataArray);
+    drawBars(dataArray, bufferLength);
+
+    // milkshake
+    //if (typeof shaker != "undefined")
+    //shaker.music.addPCM(inputL, inputR);
+}
+
+source.connect(processor);
+processor.connect(analyser);
+analyser.connect(context.destination);
+
+//-----------------------------------
+
+
+
+// // initiate auth popup
+// SC.connect(function() {
+//     SC.get('/me', function(me) { 
+//     //console.log(me);
+//     });
+
+
+//     var jsonp = document.createElement("script");
+//     jsonp.type = "text/javascript";
+//     jsonp.src = "http://api.soundcloud.com/resolve.json?url=" + escape("https://soundcloud.com/flowjob/flowjobs-early-x-mas-live-set-mp3") + 
+//                 "&client_id=7e93c6c53246047912be8885c59ee55a&callback=SoundCloudCallback";
+//     //document.body.appendChild(jsonp);
+
+//     // find all sounds of buskers licensed under 'creative commons share alike'
+//     var track_url = 'https://soundcloud.com/flowjob/flowjobs-early-x-mas-live-set-mp3';
+//     SC.get('/resolve', { url: track_url }, function(track) {
+//        console.log(track);
+//        var url = track.stream_url + ((track.stream_url.indexOf("?") == -1) ? "?" : "&") + "client_id=7e93c6c53246047912be8885c59ee55a";
+//        console.log(url);
+//        $("#audio-test").attr("src", url);
+//      });
+// });
+
+
+// function SoundCloudCallback(response) {
+//     console.log(response);
+// }
+
+
+// // find all sounds of buskers licensed under 'creative commons share alike'
+// var track_url = 'https://soundcloud.com/flowjob/flowjobs-early-x-mas-live-set-mp3';
+// SC.get('/resolve', { url: track_url }, function(track) {
+//    console.log(track);
+//    var url = track.stream_url + ((track.stream_url.indexOf("?") == -1) ? "?" : "&") + "client_id=7e93c6c53246047912be8885c59ee55a";
+//    console.log(url);
+//    $("#audio-test").attr("src", url);
+// });
+
+
+
+// SC.get("/tracks/75868018", {}, function(sound){
+//     console.log(sound.uri);
+//     $("#audio-test").attr("src", sound.uri);
+// });
+
+</script>
+
+</body>
+</html>
