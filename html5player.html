@@ -5,18 +5,17 @@
 <audio id="audio-test" src="https://api.soundcloud.com/tracks/176852404/stream?client_id=7e93c6c53246047912be8885c59ee55a" controls></audio>
 
 <div id="visualizerwrapper">
-    <canvas id="visualizer" width="640" height="200"></canvas> 
+    <canvas id="visualizer" width="640" height="256"></canvas> 
 </div>
 
 
 <div id="milkshakewrapper">
     <canvas id="milkshake" width="640" height="500"></canvas> 
 </div>
-
+<!--
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script src="http://connect.soundcloud.com/sdk.js"></script>
-<script type="text/javascript" src="milkshake/milkshake.js"></script>
-
+ -->
 <script>
 
 // SC.initialize({
@@ -28,7 +27,7 @@
 
 
 
-// set up canvas context for visualizer
+// // set up canvas context for visualizer
 
 var canvas = document.querySelector('#visualizer');
 var milkshakecanvas = document.querySelector('#milkshake');
@@ -47,19 +46,18 @@ canvas.setAttribute('width',intendedWidth);
 WIDTH = canvas.width;
 HEIGHT = canvas.height;
 
-function drawBars(buffer, bufferLength) {
+function drawBars(buffer, binCount) {
       canvasCtx.fillStyle = 'rgb(0, 0, 0)';
       canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
 
-      var barWidth = (WIDTH / bufferLength) * 2.5;
+      var barWidth = (WIDTH / (binCount)) - 1;//.5;
       var barHeight;
       var x = 0;
 
-      for(var i = 0; i < bufferLength; i++) {
+      for(var i = 0; i < binCount; i++) {
         barHeight = buffer[i];
-
-        canvasCtx.fillStyle = 'rgb(' + (barHeight+100) + ',50,50)';
-        canvasCtx.fillRect(x,HEIGHT-barHeight/2,barWidth,barHeight/2);
+        canvasCtx.fillStyle = 'rgb(' + ((barHeight * 2)+100) + ',50,50)';
+        canvasCtx.fillRect(x,HEIGHT-barHeight,barWidth,barHeight);
 
         x += barWidth + 1;
       }
@@ -67,17 +65,17 @@ function drawBars(buffer, bufferLength) {
 
 //------------------------------------------
 
-var song_url = "https://api.soundcloud.com/tracks/176852404/stream?client_id=7e93c6c53246047912be8885c59ee55a";
+// var song_url = "https://api.soundcloud.com/tracks/176852404/stream?client_id=7e93c6c53246047912be8885c59ee55a";
 
 var audio_el = document.querySelector('#audio-test');
 
 var context = new (window.AudioContext || window.webkitAudioContext)();
 var source = context.createMediaElementSource(audio_el);
-var processor = context.createScriptProcessor(512);
+var processor = context.createScriptProcessor(1024);
 var analyser = context.createAnalyser()
 
-analyser.fftSize = 256;
-var bufferLength = analyser.fftSize;
+analyser.fftSize = 128;
+var bufferLength = analyser.frequencyBinCount;
 var dataArray = new Uint8Array(bufferLength);
 
 processor.onaudioprocess = function(event) {
@@ -87,8 +85,6 @@ processor.onaudioprocess = function(event) {
     var outputR = event.outputBuffer.getChannelData(1);  
     var n = inputL.length;
 
-    //console.log("Processing.. " + n);
-
     for (var i = 0; i < n; ++i) {
         outputL[i] = inputL[i];
         outputR[i] = inputR[i];
@@ -96,7 +92,7 @@ processor.onaudioprocess = function(event) {
 
     // fft
     analyser.getByteFrequencyData(dataArray);
-    drawBars(dataArray, bufferLength);
+    drawBars(dataArray, analyser.frequencyBinCount);
 
     // milkshake
     //if (typeof shaker != "undefined")
