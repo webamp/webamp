@@ -27,11 +27,22 @@
 
 
     <input ng-model="queue_id">
-    <button ng-click="queue.loadQueue(queue_id)">Load</button>
+    <button ng-click="queue.loadQueue(queue_id, player_name)">Load</button>
 
-      <ul class="playlist" as-sortable="queue.dragControlListeners" ng-model="queue.songs">
-        <li ng-repeat="song in queue.songs" as-sortable-item ng-class="{playing: song.playing}"><div as-sortable-item-handle>{{ song.name }} - {{ song.$priority }}</div></li>
+      <ul class="playlist" as-sortable="queue.dragControlListeners" ng-model="queue.tracks">
+        <li ng-repeat="track in queue.tracks" as-sortable-item ng-class="{playing: track.playing}"><div as-sortable-item-handle>{{ track.name }} ({{ track.$priority }})</div></li>
       </ul>
+
+    <h3> Players </h3>
+
+    <input ng-model="player_name">
+    <button ng-click="queue.renamePlayer(player_name)">Rename</button>
+
+    <ul class="players">
+      <li ng-repeat="player in queue.players" ng-class="{playing: player.playing, itsme: player.$id == queue.playerRef.key()}">
+        {{ player.$id }} - {{ player.name }}
+      </li>
+    </ul>  
  </div>
 
 

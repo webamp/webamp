@@ -1,5 +1,14 @@
 var app = angular.module("webamp", ["firebase", "ui.sortable"]);
 
+app.value('firebaseUrl', 'https://blistering-torch-5309.firebaseio.com/');
+
+app.run(["$firebaseAuth", 'firebaseUrl',
+    function($firebaseAuth, firebaseUrl) {
+        var ref = new Firebase(firebaseUrl);
+        var auth = $firebaseAuth(ref);
+        auth.$authAnonymously();
+    }
+]);
 
 app.factory("SortableFirebaseArray", function($FirebaseArray, $firebase) {
     return $FirebaseArray.$extendFactory({
@@ -30,6 +39,7 @@ app.factory("SortableFirebaseArray", function($FirebaseArray, $firebase) {
             ret = $FirebaseArray.prototype.$$added.apply(this, arguments);
             if (ret.$priority == null) {
                 ret.$priority = this.highestPriority;
+                // This save doesn't seem to be working
                 this.$list.$save(ret);
             } else {
                 if (ret.$priority > this.highestPriority) {
@@ -41,7 +51,6 @@ app.factory("SortableFirebaseArray", function($FirebaseArray, $firebase) {
     });
 });
 
-app.value('firebaseUrl', 'https://blistering-torch-5309.firebaseio.com/');
 
 app.service('FirebasePaths', ['firebaseUrl',
     function(firebaseUrl) {
@@ -53,14 +62,46 @@ app.service('FirebasePaths', ['firebaseUrl',
 
 app.service('WebampQueue', ['FirebasePaths', '$firebase',
     function(FirebasePaths, $firebase){
-        var queue_id = null;
-        
-        this.songs = [];
+        this.playerId = null;
+        this.queueRef = null;
+        this.tracks = [];
 
-        // TODO: optionally append existing queue into newly loaded one?
-        this.loadQueue = function(queue_id) {
+        this.unloadQueue = function() {
+            if (this.queueRef === null) return;
+
+            this.playerRef.remove();
+            this.playerRef = null;
+            this.queueRef = null;
+            this.tracks = []
+        }
+
+        this.loadQueue = function(queue_id, name) {
+            name = name || '[Choose name]';
+
+            // unload the existing queue first.
+            // TODO: optionally save items from unloaded queue into new queue? 
+            this.unloadQueue();
             this.queueRef = FirebasePaths.queue(queue_id);
-            this.songs = $firebase(this.queueRef.child('tracks'),{arrayFactory: "SortableFirebaseArray"}).$asArray();
+
+
+            // register ourselves as a player
+            this.playerRef = this.queueRef.child('players').push({
+                name : name,
+                playing : true,
+            });
+
+            // make sure to delete from 'players' on disconnect
+            this.playerRef.onDisconnect().remove();
+
+            // load the tracks and players
+            this.tracks = $firebase(this.queueRef.child('tracks'),{arrayFactory: "SortableFirebaseArray"}).$asArray();
+            this.players = $firebase(this.queueRef.child('players')).$asArray();
+        }
+
+        this.renamePlayer = function(new_name) {
+            if (this.playerRef === null) return;
+
+            this.playerRef.update({name:new_name});
         }
 
         // TODO: need to find a better way to add this boilerplate to the SortableFirebaseArray
@@ -83,7 +124,6 @@ app.factory('$soundcloud', ['$q', '$rootScope',
         }
 
         sc.auth = function() {
-            console.log("About to auth");
             return $q(function(resolve, reject) {
                 // already logged in?
                 if (sc.authed) {
@@ -99,7 +139,6 @@ app.factory('$soundcloud', ['$q', '$rootScope',
                 // get details for logged in user
                 SC.connect(function() {
                     SC.get('/me', {}, function(me) { 
-                        console.log(me);
                         sc.userid = me.id;
                         sc.authed = true;
                         sc.name = me.username;
@@ -121,58 +160,16 @@ app.factory('$soundcloud', ['$q', '$rootScope',
     }
 ]);
 
-// app.service('$soundcloud', ['$q', 
-//     function($q){
-
-//         var instance = this;
-
-//         this.authed = false;
-//         this.userid = 0;
-
-//         this.auth = function() {
-//             return $q(function(resolve, reject) {
-//                 // already logged in?
-//                 if (instance.authed) {
-//                     resolve(instance);
-//                 }
-
-//                 SC.initialize({
-//                   client_id: '7e93c6c53246047912be8885c59ee55a',
-//                   redirect_uri: 'http://localhost:9090/callback.html'
-//                 });
-
-//                 SC.connect(function() {
-//                     SC.get('/me', {}, function(me) { 
-//                         instance.userid = me.id;
-//                         instance.authed = true;
-//                         console.log(instance);
-//                         console.log("omercy");
-//                         resolve(instance);
-//                     }, function(error) {
-//                         console.log(error);
-//                         reject(error);
-//                     });
-//                 }, function(error) {
-//                     console.log(error);
-//                     reject(error);
-//                 });
-//             });
-//         }
-        
-
-//     }
-// ]);
-
-
 app.controller('QueueCtrl', ['$scope', 'WebampQueue', 
     function($scope, WebampQueue){
         $scope.queue_id = "myqueue";
+        $scope.player_name = 'Shlomo';
         $scope.queue = WebampQueue;
 
         $scope.$on('$soundcloud::authed', function(event, soundcloud) {
             // we just had a successful soundcloud auth, lets load the
             // queue for this user
-            $scope.queue.loadQueue(soundcloud.userid);
+            $scope.queue.loadQueue(soundcloud.userid, $scope.player_name);
             $scope.queue_id = soundcloud.userid;
         });
 
@@ -186,49 +183,6 @@ app.controller('SoundCloudAuthCtrl', ['$scope', '$soundcloud',
     }
 ])
 
-
-// app.factory("Soundcloud", function($q, $rootScope) {
-//     var sc = {
-//         userid : null,
-//         authed : false,
-//         _sc_user : null,
-//         _SC : SC,
-
-//     }
-
-//     sc.auth = function() {
-//         return $q(function(resolve, reject) {
-//             // already logged in?
-//             if (sc.authed) {
-//                 resolve(sc.userid);
-//             }
-
-//             SC.initialize({
-//               client_id: '7e93c6c53246047912be8885c59ee55a',
-//               redirect_uri: 'http://localhost:9090/callback.html'
-//             });
-
-//             SC.connect(function() {
-//                 SC.get('/me', {}, function(me) { 
-//                     sc.userid = me.id;
-//                     sc.authed = true;
-//                     sc._sc_user = me;
-//                     console.log("Userid: " + me.id);
-//                     $rootScope.$broadcast("login-success");
-//                     resolve(sc);
-//                 }, function(error) {
-//                     console.log(error);
-//                     reject(error);
-//                 });
-//             }, function(error) {
-//                 console.log(error);
-//                 reject(error);
-//             });
-//         });
-//     }
-
-//     return sc;
-// });
 
 /*
 app.controller('QueueCtrlOld', ["$scope", "$firebase", "firebaseUrl", "Soundcloud",
