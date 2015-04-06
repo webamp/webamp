@@ -1,6 +1,6 @@
 var app = angular.module("webamp", ["firebase", "ui.sortable"]);
 
-app.value('firebaseUrl', 'https://blistering-torch-5309.firebaseio.com/');
+app.constant('FIREBASEURL', 'https://blistering-torch-5309.firebaseio.com/');
 
 app.run(["$firebaseAuth", 'firebaseUrl',
     function($firebaseAuth, firebaseUrl) {
@@ -52,13 +52,40 @@ app.factory("SortableFirebaseArray", function($FirebaseArray, $firebase) {
 });
 
 
-app.service('FirebasePaths', ['firebaseUrl',
-    function(firebaseUrl) {
+app.service('FirebasePaths', ['FIREBASEURL',
+    function(FIREBASEURL) {
         this.queue = function(queue_id) {
-            return new Firebase(firebaseUrl + '/queues/' + queue_id);
+            return new Firebase(FIREBASEURL + '/queues/' + queue_id);
         }
     }
 ]);
+
+app.factory('Queue', ['FIREBASEURL', '$firebase',
+    function(FIREBASEURL, $firebase){
+        var ref = new Firebase(FIREBASEURL);
+        var Queue = {};
+
+        Queue.tracks = function(queueId) {
+            return $firebase(ref.child('queues').child(queueId).child('tracks'),{arrayFactory: "SortableFirebaseArray"}).$asArray();
+        }
+
+        Queue.players = function(queueId) {
+            return $firebase(ref.child('queues').child(queueId).child('players')).$asArray();
+        }
+
+        Queue.addPlayer = function(queueId, name) {
+            name = name || '[Choose name]';
+            var playerRef = ref.child('queues').child(queueId).child('players').push({
+                name : name,
+                playing : true,
+            });
+
+            playerRef.onDisconnect().remove();
+        }
+
+        return Queue;
+    }
+])
 
 app.service('WebampQueue', ['FirebasePaths', '$firebase',
     function(FirebasePaths, $firebase){
@@ -182,45 +209,3 @@ app.controller('SoundCloudAuthCtrl', ['$scope', '$soundcloud',
         $scope.soundcloud = $soundcloud;        
     }
 ])
-
-
-/*
-app.controller('QueueCtrlOld', ["$scope", "$firebase", "firebaseUrl", "Soundcloud",
-    function($scope, $firebase, firebaseUrl, Soundcloud) {
-        $scope.loading = true;
-        $scope.authed = false;
-
-        $scope.songs = [];
-
-        $scope.dragControlListeners = {
-            orderChanged: function(event) {
-                var list = event.source.sortableScope.modelValue;
-                list.moveTo(event.source.itemScope.modelValue, event.dest.index);
-            }
-        }
-
-        Soundcloud.auth().then(function() {
-            console.log("Someone authed soundcloud, controller knows about it");
-        })
-
-        // $scope.doauth = function() {
-        //     Soundcloud.auth().then(
-        //         function() {
-        //             $scope.authed = true;
-        //             var ref = new Firebase(firebaseUrl + '/queues/' + Soundcloud.userid);
-        //             $scope.songs = $firebase(ref, {arrayFactory: "SortableFirebaseArray"}).$asArray();
-        //             $scope.songs.$loaded(
-        //                 function(list) {
-        //                     window.list = $scope.songs;
-        //                     $scope.loading = false;
-        //                 }, function(error) {
-        //                     console.log("Error: " + error);
-        //                 }
-        //             );
-        //         }, function(error) {
-        //             console.log(error);
-        //         }
-        //     );
-        // }
-    }])
-    */
