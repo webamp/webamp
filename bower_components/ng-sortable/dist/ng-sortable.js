@@ -59,7 +59,7 @@
          * @returns {String} Height
          */
         height: function (element) {
-          return element.prop('offsetHeight');
+          return element[0].getBoundingClientRect().height;
         },
 
         /**
@@ -69,7 +69,7 @@
          * @returns {String} Width
          */
         width: function (element) {
-          return element.prop('offsetWidth');
+          return element[0].getBoundingClientRect().width;
         },
 
         /**
@@ -337,9 +337,7 @@
      * @param itemData - the item model data.
      */
     $scope.insertItem = function (index, itemData) {
-      $scope.safeApply(function () {
-        $scope.modelValue.splice(index, 0, itemData);
-      });
+      $scope.modelValue.splice(index, 0, itemData);
     };
 
     /**
@@ -351,9 +349,7 @@
     $scope.removeItem = function (index) {
       var removedItem = null;
       if (index > -1) {
-        $scope.safeApply(function () {
-          removedItem = $scope.modelValue.splice(index, 1)[0];
-        });
+        removedItem = $scope.modelValue.splice(index, 1)[0];
       }
       return removedItem;
     };
@@ -377,22 +373,6 @@
      */
     $scope.accept = function (sourceItemHandleScope, destScope, destItemScope) {
       return $scope.callbacks.accept(sourceItemHandleScope, destScope, destItemScope);
-    };
-
-    /**
-     * Checks the current phase before executing the function.
-     *
-     * @param fn the function to execute.
-     */
-    $scope.safeApply = function (fn) {
-      var phase = this.$root.$$phase;
-      if (phase === '$apply' || phase === '$digest') {
-        if (fn && (typeof fn === 'function')) {
-          fn();
-        }
-      } else {
-        this.$apply(fn);
-      }
     };
 
   }]);
@@ -425,7 +405,6 @@
             if (!ngModel.$modelValue || !angular.isArray(ngModel.$modelValue)) {
               ngModel.$setViewValue([]);
             }
-
             scope.modelValue = ngModel.$modelValue;
           };
           //set the element in scope to be accessed by its sub scope.
@@ -898,7 +877,6 @@
               //rollback all the changes.
               rollbackDragChanges();
               // update model data
-              //debugger;
               dragItemInfo.apply();
               scope.sortableScope.$apply(function () {
                 if (dragItemInfo.isSameParent()) {
@@ -1019,7 +997,6 @@
      * @returns {*} - index value.
      */
     $scope.index = function () {
-      //return $scope.sortableScope.modelValue.$indexFor($scope.modelValue);
       return $scope.sortableScope.modelValue.indexOf($scope.modelValue);
     };
 
@@ -1029,7 +1006,6 @@
      * @returns {*} - item model value.
      */
     $scope.itemData = function () {
-      //return $scope.sortableScope.modelValue.$keyAt($scope.$index);
       return $scope.sortableScope.modelValue[$scope.$index];
     };
 
