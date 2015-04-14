@@ -73,34 +73,42 @@
       </md-toolbar>
 
       <section layout="row" flex>
+
+        <!-- Search -->        
         <md-content flex ng-controller="SearchCtrl" layout-padding layout-margin layout="column">
-          
+
           <md-toolbar layout-fill layout-margin>
             <form ng-submit="getSearchResults(searchText)">
-              <md-autocomplete md-selected-item="selectedItem" md-search-text="searchText" md-items="item in getAutoCompleteMatches(searchText)" md-item-text="item.title" md-selected-item-change="getSearchResults(searchText)" placeholder="Search">
-                <span md-highlight-text="searchText">
-                  {{item.title}}
-                </span>
-              </md-autocomplete>
+              <md-content layout="row">
+                <md-autocomplete md-selected-item="selectedItem" md-search-text="searchText" md-items="item in getAutoCompleteMatches(searchText)" md-item-text="item.title" md-selected-item-change="getSearchResults(searchText)" placeholder="Search" flex>
+                  <span md-highlight-text="searchText">
+                    {{item.title}}
+                  </span>
+                </md-autocomplete>
+                <md-button type="submit">
+                  <span>Search</span>
+                </md-button>
+              </md-content>
             </form>
           </md-toolbar>
 
-          <md-content flex>
-            <md-list>
-              <md-list-item ng-repeat="result in searchResults">
-                <p md-highlight-text="searchText">{{result.title}}</p>
-                <md-divider></md-divider>
-              </md-list-item>
-            </md-list>
-            <md-button ng-show="nextResults" ng-click="getNextSearchResults()">
-              <span>
-                Next
-              </span>
-            </md-button>
-          </md-content>
+            <md-content flex focus-on="search-results" tabindex="1">
+              <md-list>
+                <md-list-item ng-repeat="result in searchResults">
+                  <p md-highlight-text="searchText">{{result.title}}</p>
+                  <md-divider></md-divider>
+                </md-list-item>
+              </md-list>
+              <md-button ng-show="nextResults" ng-click="getNextSearchResults()">
+                <span>
+                  Next
+                </span>
+              </md-button>
+            </md-content>
 
         </md-content>
 
+        <!-- Playlist -->
         <md-sidenav layout="column" class="md-sidenav-right md-whiteframe-z2 md-padding" md-component-id="playlist" md-is-locked-open="playlistVisible&&$mdMedia('gt-sm')">
 
           <md-content class="md-padding md-margin" flex>
@@ -232,6 +240,7 @@
     <script src="bower_components/angular-mocks/angular-mocks.js"></script>
     <script src="bower_components/drop-ng/src/drop-ng.js"></script>
     <script src="bower_components/ngstorage/ngStorage.js"></script>
+    <script src="bower_components/ng-focus-on/ng-focus-on.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 

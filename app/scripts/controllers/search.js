@@ -8,7 +8,7 @@
  * Controller of the WebampApp
  */
 angular.module('WebampApp')
-  .controller('SearchCtrl', function ($scope, Soundcloud) {
+  .controller('SearchCtrl', function ($scope, Soundcloud, focus) {
     $scope.selectedItem = null;
 	$scope.searchText = "";
 	$scope.searchResults = []
@@ -38,10 +38,7 @@ angular.module('WebampApp')
 		$scope.searchResults = []
 		$scope.nextResults = null;
 
-		// HACK. This is not the angular way
-		if (!$scope.selectedItem) {
-			document.activeElement.blur();
-		}
+		focus('search-results');
 
 		if ($scope.selectedItem && $scope.selectedItem.search) {
 			query = $scope.selectedItem.search;

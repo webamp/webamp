@@ -18,6 +18,7 @@ var app = angular
     'drop-ng',
     'ngStorage',
     'firebase',
+    'focusOn',
   ])
   .config(function ($routeProvider) {
     $routeProvider

@@ -35,6 +35,7 @@ module.exports = function(config) {
       'bower_components/angular-mocks/angular-mocks.js',
       'bower_components/drop-ng/src/drop-ng.js',
       'bower_components/ngstorage/ngStorage.js',
+      'bower_components/ng-focus-on/ng-focus-on.js',
       // endbower
       'app/scripts/**/*.js',
       'test/mock/**/*.js',

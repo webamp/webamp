@@ -45,14 +45,8 @@ angular.module('WebampApp')
     }
 
     Soundcloud.auth = function() {
-      // already authed?
-      if (Soundcloud.authed) {
-        return;
-      }
-
-      // show popup if we aren't authed yet
-      $q(function(resolve, reject) {
-        if (SC.isConnected()) {
+      return $q(function(resolve, reject) {
+        if (Soundcloud.authed || SC.isConnected()) {
           resolve();
         } else {
           SC.connect(resolve, reject);
