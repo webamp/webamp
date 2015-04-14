@@ -8,7 +8,7 @@
  * Controller of the WebampApp
  */
 angular.module('WebampApp')
-  .controller('QueueCtrl', function ($scope, $mdSidenav, $mdMedia) {
+  .controller('QueueCtrl', function ($scope, $mdSidenav, $mdMedia, $mdDialog) {
 	    $scope.togglePlaylist = function() {
         if (!$mdMedia('gt-sm')) {
 	        $mdSidenav('playlist').toggle();
@@ -17,5 +17,16 @@ angular.module('WebampApp')
         }
 	    };
       $scope.playlistVisible = true;
+
+      // $scope.volumeSlider = function($event) {
+      //   $mdDialog.show({
+      //     targetEvent: $event,
+      //     parent:$event.target,
+      //     template:
+      //       '<md-dialog>' +
+      //       '  <md-content>Hello!</md-content>' +
+      //       '</md-dialog>',
+      //   });
+      // }
   }
 );

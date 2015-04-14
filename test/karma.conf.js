@@ -19,6 +19,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       // bower:js
+      'bower_components/jquery/dist/jquery.js',
       'bower_components/angular/angular.js',
       'bower_components/angular-animate/angular-animate.js',
       'bower_components/angular-route/angular-route.js',
@@ -29,7 +30,11 @@ module.exports = function(config) {
       'bower_components/ng-sortable/dist/ng-sortable.js',
       'bower_components/firebase/firebase.js',
       'bower_components/angularfire/dist/angularfire.js',
+      'bower_components/tether/tether.js',
+      'bower_components/drop/drop.js',
       'bower_components/angular-mocks/angular-mocks.js',
+      'bower_components/drop-ng/src/drop-ng.js',
+      'bower_components/ngstorage/ngStorage.js',
       // endbower
       'app/scripts/**/*.js',
       'test/mock/**/*.js',
