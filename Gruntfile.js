@@ -348,6 +348,14 @@ module.exports = function (grunt) {
           ]
         }, {
           expand: true,
+          flatten: true,
+          cwd: 'bower_components/',
+          dest: '<%= yeoman.dist %>/fonts',
+          src: [ 
+            'mdi/fonts/*.*', // Material Design Icons
+          ]
+        }, {
+          expand: true,
           cwd: '.tmp/images',
           dest: '<%= yeoman.dist %>/images',
           src: ['generated/*']
