@@ -8,14 +8,18 @@
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
     <!-- build:css(.) styles/vendor.css -->
     <!-- bower:css -->
-    <link rel="stylesheet" href="bower_components/angular-material/angular-material.css" />
     <link rel="stylesheet" href="bower_components/ng-sortable/dist/ng-sortable.css" />
     <link rel="stylesheet" href="bower_components/mdi/css/materialdesignicons.css" />
+    <link rel="stylesheet" href="bower_components/mdi/css/materialdesignicons.min.css" />
+    <link rel="stylesheet" href="bower_components/angular-material/angular-material.css" />
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
     <link rel="stylesheet" href="styles/main.css">
     <!-- endbuild -->
+
+    <link href="../../bower_components/drop/css/drop-theme-arrows-bounce.css" rel="stylesheet" />
+    <link href="../../bower_components/drop/css/drop-theme-arrows-bounce-dark.css" rel="stylesheet" />
   </head>
   <body ng-app="WebampApp" ng-controller="QueueCtrl" layout="column">
     <!--[if lt IE 7]>
@@ -30,45 +34,60 @@
             <md-icon md-font-icon="mdi-account-key" class="mdi"></md-icon>
           </md-button>
           <h2>
-            <span>Toolbar with Icon Buttons</span>
+            <span>WebAmp</span>
           </h2>
           <span flex></span>
-          <md-button class="md-icon-button" aria-label="Favorite">
-            <md-icon md-svg-icon="img/icons/favorite.svg" style="color: greenyellow;"></md-icon>
-          </md-button>
-          <md-button class="md-icon-button" aria-label="More">
-            <md-icon md-svg-icon="img/icons/more_vert.svg"></md-icon>
-          </md-button>
 
+    
+          <!-- auth -->
           <div ng-controller="AuthCtrl">
-            <div ng-show="!soundcloud.authed">
-               <span>Not authed. </span>
-               <button ng-click="soundcloud.auth()">Auth</button>
-            </div>
-            <div ng-show="soundcloud.authed">
-               Authed as <strong>{{soundcloud.username}}</strong>
-               <button ng-click="soundcloud.unauth()">Un Auth</button>
-            </div>
+            <md-button class="md-icon-button" aria-label="Account" ng-controller="AuthCtrl">
+              
+              <md-icon md-font-icon="{{ soundcloud.authed ? 'mdi-account-check' : 'mdi-account' }}" ng-class="{'md-accent':soundcloud.authed, mdi:true}"></md-icon>
+              
+              <drop classes='drop.classes' position='drop.position'>
+              
+                <div>
+                  <div ng-show="!soundcloud.authed">
+                     <button ng-click="soundcloud.auth()">Auth <md-icon md-font-icon="mdi-soundcloud" class="mdi"></md-icon>
+                    </button>
+                  </div>
+                  <div ng-show="soundcloud.authed">
+                    <md-icon md-font-icon="mdi-soundcloud" class="mdi md-accent"></md-icon>
+                    <strong>{{soundcloud.username}}</strong>
+                    <button ng-click="soundcloud.unauth()">Un Auth</button>
+                  </div>
+
+                </div>
+              </drop>
+            </md-button>
+          </div>            
+
+          <!-- volume -->
+          <div ng-controller="VolumeCtrl">
+            <md-button class="md-icon-button" aria-label="Volume">
+              <md-icon md-font-icon="{{ volume ? 'mdi-volume-high' : 'mdi-volume-off' }}" ng-class="{mdi:true, 'md-accent':volume}"></md-icon>
+               <drop                
+                  classes='drop.classes'
+                  constrain-to-scroll-parent='drop.constrainToScrollParent'
+                  constrain-to-window='drop.constrainToWindow'
+                  open-on='drop.openOn'
+                  position='drop.position'>
+                
+                  <div layout="row" flex-sm="100" flex="40" class="md-padding">
+                    <md-icon md-font-icon="mdi-volume-low" class="mdi md-primary"></md-icon>
+                    <md-slider flex min="0" max="100" ng-model="volume" aria-label="Volume"></md-slider>
+                    <md-icon md-font-icon="mdi-volume-high" class="mdi md-primary"></md-icon>
+                  </div>
+              </drop>
+            </md-button>
           </div>
+          
+          <!-- playlist -->
+          <md-button class="md-icon-button" aria-label="Volume" ng-click="togglePlaylist()">
+            <md-icon md-font-icon="mdi-view-headline" ng-class="{mdi:true, 'md-accent':playlistLocked()}"></md-icon>
 
-          <button ng-click="volumeSlider($event)">
-            <span>V</span>
-          </button>
-          <button> -->
-  <!--           <drop classes='drop-theme-arrows-bounce-dark'
-              constrain-to-scroll-parent='true'
-              constrain-to-window='true'
-              open-on='click'
-              position='bottom left'>
-
-              Volume slider goes here
-
-              <span drop-close>Click to close</span>
-            </drop>
-   -->        </button>
-          <button ng-click="togglePlaylist()">
-            <span>PL</span>
-          </button>
+          </md-button>
 
         </div>
       </md-toolbar>
@@ -76,30 +95,32 @@
       <section layout="row" flex>
 
         <!-- Search -->        
-        <md-content flex ng-controller="SearchCtrl" layout-padding layout-margin layout="column">
+        <md-content flex ng-controller="SearchCtrl" layout="column">
 
-          <md-toolbar layout-fill layout-margin>
+          <md-toolbar layout-fill>
             <form ng-submit="getSearchResults(searchText)">
-              <md-content layout="row">
+              <md-content layout="row" layout-align="center center" layout-margin>
                 <md-autocomplete md-selected-item="selectedItem" md-search-text="searchText" md-items="item in getAutoCompleteMatches(searchText)" md-item-text="item.title" md-selected-item-change="getSearchResults(searchText)" placeholder="Search" flex>
                   <span md-highlight-text="searchText">
                     {{item.title}}
                   </span>
                 </md-autocomplete>
-                <md-button type="submit">
-                  <span>Search</span>
+                <md-button class="md-icon-button md-fab md-primary md-mini" type="submit" aria-label="Search">
+                  <md-icon md-font-icon="mdi-magnify" class="mdi"></md-icon>
                 </md-button>
               </md-content>
             </form>
           </md-toolbar>
 
             <md-content flex focus-on="search-results" tabindex="1">
+              
               <md-list>
                 <md-list-item ng-repeat="result in searchResults">
                   <p md-highlight-text="searchText">{{result.title}}</p>
                   <md-divider></md-divider>
                 </md-list-item>
               </md-list>
+              
               <md-button ng-show="nextResults" ng-click="getNextSearchResults()">
                 <span>
                   Next
@@ -112,17 +133,19 @@
         <!-- Playlist -->
         <md-sidenav layout="column" class="md-sidenav-right md-whiteframe-z2 md-padding" md-component-id="playlist" md-is-locked-open="playlistVisible&&$mdMedia('gt-sm')">
 
-          <md-content class="md-padding md-margin" flex>
+          <md-content flex>
+            
             <md-list>
               <md-list-item>
                 test 1
+                <md-divider></md-divider>
               </md-list-item>
-              <md-divider></md-divider>
               <md-list-item>
                 test 2
+                <md-divider></md-divider>
               </md-list-item>
-              <md-divider></md-divider>
             </md-list>
+            
           </md-content>
 
         </md-sidenav>
@@ -130,84 +153,6 @@
       </section>
     </div>
 
-
-<!-- 
-    <section layout="row">
-      <md-toolbar layout="row">
-        <h1 class="md-toolbar-tools">Title</h1>
-        <span flex></span>
-
-        <div ng-controller="AuthCtrl">
-          <div ng-show="!soundcloud.authed">
-             <span>Not authed. </span>
-             <button ng-click="soundcloud.auth()">Auth</button>
-          </div>
-          <div ng-show="soundcloud.authed">
-             Authed as <strong>{{soundcloud.username}}</strong>
-             <button ng-click="soundcloud.unauth()">Un Auth</button>
-          </div>
-        </div>
-
-        <button ng-click="volumeSlider($event)">
-          <span>V</span>
-        </button>
-        <button> -->
-<!--           <drop classes='drop-theme-arrows-bounce-dark'
-            constrain-to-scroll-parent='true'
-            constrain-to-window='true'
-            open-on='click'
-            position='bottom left'>
-
-            Volume slider goes here
-
-            <span drop-close>Click to close</span>
-          </drop>
- -->        <!-- </button>
-        <button ng-click="togglePlaylist()">
-          <span>PL</span>
-        </button>
-        
-
-      </md-toolbar>
-    </section>
-    
-    <section layout="row" ng-controller='SearchCtrl' flex>
-
-    <div layout="column" flex>
-
-      <md-autocomplete md-selected-item="selectedItem" md-search-text="searchText" md-items="item in getAutoCompleteMatches(searchText)" md-item-text="item.title" md-selected-item-change="getSearchResults(searchText)" placeholder="Search">
-          <span flex md-highlight-text="searchText">{{item.title}}</span>
-      </md-autocomplete>
-
-          <md-list> 
-            <md-list-item class="md-2-line" ng-repeat="result in searchResults">
-              <p>{{result.title}}</p>
-              <md-divider>
-            </md-list-item>
-          </md-list>
-          <md-button ng-show="nextResults" ng-click="getNextSearchResults()">
-            Next
-          </md-button>
-
-    </div>
-
-    <md-sidenav layout="column" class="md-sidenav-right md-whiteframe-z2 md-padding" md-component-id="playlist" md-is-locked-open="playlistVisible&&$mdMedia('gt-sm')">
-
-      <md-content class="md-padding md-margin" flex>
-        <md-list>
-          <md-list-item>
-            test 1
-          </md-list-item>
-          <md-divider></md-divider>
-          <md-list-item>
-            test 2
-          </md-list-item>
-          <md-divider></md-divider>
-        </md-list>
-      </md-content>
-
-    </md-sidenav>
-  </section> -->
 
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
 
@@ -223,6 +168,8 @@
     </script>
     -->
 
+    <script src="bower_components/drop/drop.min.js"></script>
+
     <!-- build:js(.) scripts/vendor.js -->
     <!-- bower:js -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
@@ -231,17 +178,17 @@
     <script src="bower_components/angular-route/angular-route.js"></script>
     <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
     <script src="bower_components/angular-touch/angular-touch.js"></script>
-    <script src="bower_components/angular-aria/angular-aria.js"></script>
-    <script src="bower_components/angular-material/angular-material.js"></script>
     <script src="bower_components/ng-sortable/dist/ng-sortable.js"></script>
     <script src="bower_components/firebase/firebase.js"></script>
     <script src="bower_components/angularfire/dist/angularfire.js"></script>
+    <script src="bower_components/ngstorage/ngStorage.js"></script>
+    <script src="bower_components/ng-focus-on/ng-focus-on.js"></script>
+    <script src="bower_components/angular-aria/angular-aria.js"></script>
+    <script src="bower_components/angular-material/angular-material.js"></script>
     <script src="bower_components/tether/tether.js"></script>
     <script src="bower_components/drop/drop.js"></script>
     <script src="bower_components/angular-mocks/angular-mocks.js"></script>
     <script src="bower_components/drop-ng/src/drop-ng.js"></script>
-    <script src="bower_components/ngstorage/ngStorage.js"></script>
-    <script src="bower_components/ng-focus-on/ng-focus-on.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 
@@ -254,6 +201,7 @@
         <script src="scripts/services/soundcloud.js"></script>
         <script src="scripts/controllers/auth.js"></script>
         <script src="scripts/controllers/search.js"></script>
+        <script src="scripts/controllers/volume.js"></script>
         <!-- endbuild -->
 </body>
 </html>

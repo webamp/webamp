@@ -9,7 +9,16 @@
  */
 angular.module('WebampApp')
   .controller('AuthCtrl', function ($scope, $localStorage, Soundcloud) {
-  	$scope.soundcloud = Soundcloud;
+    
+    $scope.drop = {
+      classes : 'drop-theme-arrows-bounce-dark',
+      constrainToScrollParent : 'true',
+      constrainToWindow: 'true',
+      openOn: 'click',
+      position: 'bottom right'
+    }
+
+    $scope.soundcloud = Soundcloud;
   	
   	$scope.$storage = $localStorage.$default({
   		accessToken : null,

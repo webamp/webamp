@@ -37,6 +37,7 @@ var app = angular
   .constant('FIREBASE_URL', 'https://blistering-torch-5309.firebaseio.com/')
   .constant('SOUNDCLIENT_CLIENTID', '7e93c6c53246047912be8885c59ee55a');
 
+
 app.run(
   function($firebaseAuth, FIREBASE_URL, SOUNDCLIENT_CLIENTID, $localStorage, Soundcloud) {
     // auth firebase anonymously

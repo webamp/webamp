@@ -16,17 +16,12 @@ angular.module('WebampApp')
           $scope.playlistVisible = !$scope.playlistVisible;
         }
 	    };
-      $scope.playlistVisible = true;
 
-      // $scope.volumeSlider = function($event) {
-      //   $mdDialog.show({
-      //     targetEvent: $event,
-      //     parent:$event.target,
-      //     template:
-      //       '<md-dialog>' +
-      //       '  <md-content>Hello!</md-content>' +
-      //       '</md-dialog>',
-      //   });
-      // }
+
+      $scope.playlistLocked = function() {
+        return $scope.playlistVisible && $mdMedia('gt-sm');
+      }
+
+      $scope.playlistVisible = true;
   }
 );

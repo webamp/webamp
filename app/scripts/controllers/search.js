@@ -8,11 +8,14 @@
  * Controller of the WebampApp
  */
 angular.module('WebampApp')
-  .controller('SearchCtrl', function ($scope, Soundcloud, focus) {
+  .controller('SearchCtrl', function ($scope, $timeout, Soundcloud, focus) {
+    // md-autocomplete context
     $scope.selectedItem = null;
 	$scope.searchText = "";
 	$scope.searchResults = []
+	
 	$scope.nextResults = null;
+	$scope.currentSearchQuery = "";
 	
 	$scope.doSecondaryAction = function() {
 		console.log("moshe");
@@ -38,18 +41,24 @@ angular.module('WebampApp')
 		$scope.searchResults = []
 		$scope.nextResults = null;
 
-		focus('search-results');
 
 		if ($scope.selectedItem && $scope.selectedItem.search) {
 			query = $scope.selectedItem.search;
 			$scope.searchText = query;
+			$scope.selectedItem = null;
+			return;
 		}
+
+		$timeout(function(){
+			focus('search-results');
+			if (query) {
+				Soundcloud.search(query).then(function(results) {
+					processSearchResults(results);
+				});
+			}
+		});
+
 		
-		if (query) {
-			Soundcloud.search(query).then(function(results) {
-				processSearchResults(results);
-			});
-		}
 	}
 
 	$scope.getNextSearchResults = function() {
