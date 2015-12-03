@@ -112,16 +112,17 @@
             </form>
           </md-toolbar>
 
-            <md-content flex focus-on="search-results" tabindex="1">
+            <md-content flex focus-on="search-results" tabindex="0">
               
-              <md-list>
-                <md-list-item ng-repeat="result in searchResults">
-                  <p md-highlight-text="searchText">{{result.title}}</p>
-                  <md-divider></md-divider>
-                </md-list-item>
+              <md-list class="search-results">
+                  <md-list-item ng-repeat="result in searchResults">
+                    <p md-highlight-text="searchText" layout-margin layout-padding>{{result.title}}</p>
+                    <md-divider></md-divider>
+                  </md-list-item>
+                </ng-repeat>
               </md-list>
               
-              <md-button ng-show="nextResults" ng-click="getNextSearchResults()">
+              <md-button ng-show="nextResults" ng-click="getNextSearchResults()" layout-align="center center">
                 <span>
                   Next
                 </span>
