@@ -17,18 +17,4 @@ angular.module('WebampApp')
       openOn: 'click',
       position: 'bottom right'
     }
-
-    $scope.soundcloud = Soundcloud;
-  	
-  	$scope.$storage = $localStorage.$default({
-  		accessToken : null,
-  	});
-
-  	$scope.$on('$soundcloud::authed', function() {
-		$scope.$storage.accessToken = SC.accessToken();
-  	});
-
-  	$scope.$on('$soundcloud::unauthed', function() {
-  		$scope.$storage.accessToken = null;
-  	})
   });

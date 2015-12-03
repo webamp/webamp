@@ -93,5 +93,9 @@ angular.module('WebampApp')
       });
     }
 
+    Soundcloud.getAccessToken = function() {
+      return SC.accessToken();
+    }
+
     return Soundcloud;
   });

@@ -39,7 +39,7 @@ var app = angular
 
 
 app.run(
-  function($firebaseAuth, FIREBASE_URL, SOUNDCLIENT_CLIENTID, $localStorage, Soundcloud) {
+  function($firebaseAuth, FIREBASE_URL, SOUNDCLIENT_CLIENTID, $localStorage, Soundcloud, $rootScope) {
     // auth firebase anonymously
     var ref = new Firebase(FIREBASE_URL);
     var auth = $firebaseAuth(ref);
@@ -48,5 +48,14 @@ app.run(
     // init soundcloud with client id and possibly access token
     var accessToken = $localStorage.accessToken;
     Soundcloud.init(SOUNDCLIENT_CLIENTID, accessToken);
+
+    // keep access token stored
+    $rootScope.$on('$soundcloud::authed', function() {
+      $localStorage.accessToken = Soundcloud.getAccessToken();
+    });
+
+    $rootScope.$on('$soundcloud::unauthed', function() {
+      $localStorage.accessToken = null;
+    })
   }
 );
